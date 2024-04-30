@@ -108,7 +108,7 @@ function App() {
         {((todayWeather && todayForecast?.length) || weekForecast) &&
           !isLoading &&
           !error && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-4 pt-8">
               {todayWeather && (
                 <Weather data={todayWeather} forecastList={todayForecast} />
               )}
