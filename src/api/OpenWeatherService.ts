@@ -1,13 +1,9 @@
-import {GEO_API_URL, WEATHER_API_URL, WEATHER_API_KEY, WEATHER_RAPID_API_KEY} from "../conf";
+import {
+  WEATHER_API_GEOCODING_URL,
+  WEATHER_API_KEY,
+  WEATHER_API_URL,
+} from "../conf";
 import { WeekForecastWeatherInterface } from "../utilities/DataUtils";
-
-const GEO_API_OPTIONS = {
-  method: "GET",
-  headers: {
-    "X-RapidAPI-Key": WEATHER_RAPID_API_KEY,
-    "X-RapidAPI-Host": "wft-geo-db.p.rapidapi.com",
-  },
-};
 
 export type TodayWeatherInterface = WeatherInterface & {
   city: string;
@@ -134,52 +130,50 @@ export async function fetchWeatherData(
     const weatherResponse = await weatherPromise.json();
     const forecastResponse = await forecastPromise.json();
 
-    if (weatherResponse.cod !== 200 && forecastResponse.cod !== 200) {
+    if (weatherResponse.cod !== 200 && forecastResponse.cod !== 200)
       throw weatherResponse?.message;
-    }
 
-    return Promise.resolve(<[WeatherInterface, ForecastInterface]>[
+    return <[WeatherInterface, ForecastInterface]>[
       weatherResponse,
       forecastResponse,
-    ]);
+    ];
   } catch (error) {
     console.error(error);
     throw error;
   }
 }
 
-interface CitiesInterface {
-  data: [
-    {
-      city: string;
-      country: string;
-      countryCode: string;
-      id: number;
-      latitude: number;
-      longitude: number;
-      name: string;
-      population: number;
-      region: string;
-      regionCode: string;
-      regionWdId: string;
-      type: string;
-      wikiDataId: string;
-    }
-  ];
-  metadata: {
-    currentOffset: number;
-    totalCount: number;
-  };
+export interface ReverseGeocodingInterface {
+  country: string;
+  lat: number;
+  local_names: { [key: string]: string };
+  lon: number;
+  name: string;
+  state: string;
 }
 
-export async function fetchCities(input: string): Promise<CitiesInterface> {
+export async function fetchCities(
+  input: string
+): Promise<ReverseGeocodingInterface[]> {
   try {
     const response = await fetch(
-      `${GEO_API_URL}/cities?minPopulation=10000&namePrefix=${input}`,
-      GEO_API_OPTIONS
+      `${WEATHER_API_GEOCODING_URL}/direct?q=${input}&limit=5&appid=${WEATHER_API_KEY}`
     );
-    const res = response.json();
-    return Promise.resolve(res);
+    return response.json();
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+export async function fetchCurrentCity(
+  position: GeolocationPosition
+): Promise<ReverseGeocodingInterface[]> {
+  try {
+    const response = await fetch(
+      `${WEATHER_API_GEOCODING_URL}/reverse?lat=${position.coords.latitude}8&lon=${position.coords.longitude}&limit=1&appid=${WEATHER_API_KEY}`
+    );
+    return response.json();
   } catch (error) {
     console.error(error);
     throw error;

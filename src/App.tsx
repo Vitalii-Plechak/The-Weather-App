@@ -18,7 +18,7 @@ import { ALL_DESCRIPTIONS } from "./utilities/DateConstants";
 import Loader from "./components/Sharable/Loader";
 import { SingleValue } from "react-select";
 import Error from "./components/Sharable/Error";
-import SunIcon from "./assets/icons/sun.svg"
+import SunIcon from "./assets/icons/sun.svg";
 
 function App() {
   const [todayWeather, setTodayWeather] = useState<TodayWeatherInterface>();
@@ -72,10 +72,23 @@ function App() {
     setIsLoading(false);
   }
 
+  function handleFetchByCurrentLocation() {
+    setIsLoading(true);
+  }
+
+  function handleFetchByCurrentLocationError(errMessage: string) {
+    setIsLoading(false);
+    setError(errMessage);
+  }
+
   return (
     <div className="flex flex-col w-full lg:w-[80vw] max-w-screen-lg mx-auto border-2 rounded-xl p-4 min-h-[680px]">
       <Header />
-      <Search onSearchChange={handleSearchChange} />
+      <Search
+        onSearchChange={handleSearchChange}
+        onCurrentLocationClick={handleFetchByCurrentLocation}
+        onCurrentLocationClickError={handleFetchByCurrentLocationError}
+      />
 
       <div className="grow content-center text-center">
         {error && <Error message={error} />}
@@ -84,7 +97,7 @@ function App() {
           !isLoading &&
           !error && (
             <div className="flex items-center justify-center flex-col gap-2">
-              <img className="w-32 h-32" src={SunIcon} alt="Sun icon"/>
+              <img className="w-32 h-32" src={SunIcon} alt="Sun icon" />
               Explore current weather data and 6-day forecast of more than
               200,000 cities!
             </div>

@@ -1,14 +1,12 @@
 import { useState } from "react";
 import { AsyncPaginate } from "react-select-async-paginate";
-import { fetchCities } from "../api/OpenWeatherService";
+import {
+  fetchCities,
+  fetchCurrentCity,
+  ReverseGeocodingInterface,
+} from "../api/OpenWeatherService";
 import { SingleValue } from "react-select";
-
-interface CityInterface {
-  latitude: number;
-  longitude: number;
-  name: string;
-  countryCode: string;
-}
+import PinIcon from "../assets/icons/pin.svg";
 
 export interface SearchDataInterface {
   label: string;
@@ -21,20 +19,57 @@ interface OptionsInterface {
 
 type onSearchChangeType = {
   onSearchChange: (searchData: SingleValue<SearchDataInterface>) => void;
+  onCurrentLocationClick: () => void;
+  onCurrentLocationClickError: (errMessage: string) => void;
 };
 
-export function Search({ onSearchChange }: onSearchChangeType) {
+export function Search({
+  onSearchChange,
+  onCurrentLocationClick,
+  onCurrentLocationClickError,
+}: onSearchChangeType) {
   const [searchValue, setSearchValue] =
     useState<SingleValue<SearchDataInterface>>();
 
+  const loadByCurrentLocation = () => {
+    if (navigator.geolocation) {
+      onCurrentLocationClick();
+
+      navigator.geolocation.getCurrentPosition(
+        async (position: GeolocationPosition) => {
+          const currentCity = await fetchCurrentCity(position);
+
+          const enteredData: OptionsInterface = {
+            options: [
+              {
+                value: `${currentCity[0].lat} ${currentCity[0].lon}`,
+                label: `${currentCity[0].name}, ${currentCity[0].country}`,
+              },
+            ],
+          };
+
+          onChangeHandler(enteredData.options[0]);
+        },
+        (err: GeolocationPositionError) => {
+          console.error(`"Error getting user location: ${err?.message}`);
+          onCurrentLocationClickError(err?.message);
+        }
+      );
+    } else {
+      console.log("Geolocation is not supported by this browser.");
+    }
+  };
+
   const loadOptions = async (inputValue: string): Promise<OptionsInterface> => {
+    if (!inputValue.length) return { options: [] };
+
     const citiesList = await fetchCities(inputValue);
 
     return {
-      options: citiesList.data.map((city: CityInterface) => {
+      options: citiesList.map((city: ReverseGeocodingInterface) => {
         return {
-          value: `${city.latitude} ${city.longitude}`,
-          label: `${city.name}, ${city.countryCode}`,
+          value: `${city.lat} ${city.lon}`,
+          label: `${city.name}, ${city.country}`,
         };
       }),
     };
@@ -46,13 +81,21 @@ export function Search({ onSearchChange }: onSearchChangeType) {
   };
 
   return (
-    <div className="text-black">
+    <div className="flex items-center gap-2 text-black w-full">
+      <button
+        type="button"
+        title="Find by current location"
+        onClick={loadByCurrentLocation}
+      >
+        <img className="w-8" src={PinIcon} alt="Pin Icon" />
+      </button>
       <AsyncPaginate
         placeholder="Search for cities"
         debounceTimeout={600}
         value={searchValue}
         onChange={onChangeHandler}
         loadOptions={loadOptions}
+        className="w-full"
       />
     </div>
   );
