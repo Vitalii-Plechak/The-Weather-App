@@ -146,7 +146,7 @@ export async function fetchWeatherData(
 export interface ReverseGeocodingInterface {
   country: string;
   lat: number;
-  local_names: { [key: string]: string };
+  local_names: Record<string, string>;
   lon: number;
   name: string;
   state: string;

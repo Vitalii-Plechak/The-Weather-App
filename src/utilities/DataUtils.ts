@@ -34,10 +34,10 @@ export function getAverage<T extends number>(array: T[], isRound = true) {
 }
 
 export function getMostFrequentWeather(arr: string[]): string {
-  const hashmap = arr.reduce((acc, val): { [key: string]: number } => {
+  const hashmap = arr.reduce((acc, val): Record<string, number> => {
     acc[val] = (acc[val] || 0) + 1;
     return acc;
-  }, {} as { [key: string]: number });
+  }, {} as Record<string, number>);
   return Object.keys(hashmap).reduce((a, b) =>
     hashmap[a] > hashmap[b] ? a : b
   );
