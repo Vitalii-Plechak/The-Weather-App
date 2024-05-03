@@ -72,23 +72,10 @@ function App() {
     setIsLoading(false);
   }
 
-  function handleFetchByCurrentLocation() {
-    setIsLoading(true);
-  }
-
-  function handleFetchByCurrentLocationError(errMessage: string) {
-    setIsLoading(false);
-    setError(errMessage);
-  }
-
   return (
     <div className="flex flex-col w-full lg:w-[80vw] max-w-screen-lg mx-auto border-2 rounded-xl p-4 min-h-[680px]">
       <Header />
-      <Search
-        onSearchChange={handleSearchChange}
-        onCurrentLocationClick={handleFetchByCurrentLocation}
-        onCurrentLocationClickError={handleFetchByCurrentLocationError}
-      />
+      <Search onSearchChange={handleSearchChange} setIsLoading={setIsLoading} />
 
       <div className="grow content-center text-center">
         {error && <Error message={error} />}

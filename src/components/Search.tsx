@@ -19,21 +19,16 @@ interface OptionsInterface {
 
 type onSearchChangeType = {
   onSearchChange: (searchData: SingleValue<SearchDataInterface>) => void;
-  onCurrentLocationClick: () => void;
-  onCurrentLocationClickError: (errMessage: string) => void;
+  setIsLoading: (isloading: boolean) => void;
 };
 
-export function Search({
-  onSearchChange,
-  onCurrentLocationClick,
-  onCurrentLocationClickError,
-}: onSearchChangeType) {
+export function Search({ onSearchChange, setIsLoading }: onSearchChangeType) {
   const [searchValue, setSearchValue] =
     useState<SingleValue<SearchDataInterface>>();
 
   const loadByCurrentLocation = () => {
     if (navigator.geolocation) {
-      onCurrentLocationClick();
+      setIsLoading(true);
 
       navigator.geolocation.getCurrentPosition(
         async (position: GeolocationPosition) => {
@@ -52,7 +47,7 @@ export function Search({
         },
         (err: GeolocationPositionError) => {
           console.error(`"Error getting user location: ${err?.message}`);
-          onCurrentLocationClickError(err?.message);
+          setIsLoading(false);
         }
       );
     } else {
